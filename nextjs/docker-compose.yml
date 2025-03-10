@@ -1,0 +1,41 @@
+services:
+  nvtop:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: nvtop
+    container_name: nvtop
+    restart: always
+    ports:
+      - "127.0.0.1:60010:3000"
+    environment:
+      - TZ=Asia/Shanghai
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - ALLOWED_EMAILS=${ALLOWED_EMAILS}
+      - DEVOPS=${DEVOPS}
+      - DB_PATH=${DB_PATH}
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./data/nvtop:/app/data
+    depends_on:
+      - redis
+    networks:
+      - nvtop-network
+
+  redis:
+    image: redis:alpine
+    container_name: cite-redis
+    restart: always
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - nvtop-network
+
+networks:
+  nvtop-network:
+    driver: bridge
