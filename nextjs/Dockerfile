@@ -13,6 +13,6 @@ COPY package*.json ./
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-
+RUN apk add --no-cache tzdata
 EXPOSE 3000
 CMD ["node", "server.js"]

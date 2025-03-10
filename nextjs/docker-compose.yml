@@ -9,7 +9,7 @@ services:
     ports:
       - "127.0.0.1:60010:3000"
     environment:
-      - TZ=Asia/Shanghai
+      - TZ=${TZ}
       - JWT_SECRET=${JWT_SECRET}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
@@ -22,6 +22,7 @@ services:
       - REDIS_URL=redis://redis:6379
     volumes:
       - ./data/nvtop:/app/data
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - redis
     networks:
@@ -31,8 +32,11 @@ services:
     image: redis:alpine
     container_name: cite-redis
     restart: always
+    environment:
+      - TZ=Asia/Shanghai
     volumes:
       - ./data/redis:/data
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - nvtop-network
 
