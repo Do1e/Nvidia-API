@@ -17,6 +17,11 @@ export default function PerServer({ url, title, internal_time=1000 }: PerServerP
   const [activeKey, setActiveKey] = useState<string[]>(['0']);
 
   useEffect(() => {
+    // 只在 Collapse 展开时请求数据
+    if (activeKey.length === 0) {
+      return; // Collapse 隐藏时不请求数据
+    }
+
     const interval = setInterval(() => {
       fetch('/api/proxy', {
         method: 'POST',
@@ -30,8 +35,20 @@ export default function PerServer({ url, title, internal_time=1000 }: PerServerP
         });
     }, internal_time);
 
+    // 首次展开时立即请求一次数据
+    fetch('/api/proxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url }),
+    }).then((res) => res.json())
+      .then((data) => {
+        setData(data);
+      });
+
     return () => clearInterval(interval);
-  }, [url, internal_time]);
+  }, [url, internal_time, activeKey]); // 添加 activeKey 作为依赖项
 
   useEffect(() => {
     const cookies = document.cookie.split(';');
