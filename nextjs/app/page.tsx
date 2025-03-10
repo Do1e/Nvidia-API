@@ -1,12 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import PerServer from "./components/perServer";
-import type { Metadata } from "next";
 import servers from "./servers.json";
-
-export const metadata: Metadata = {
-  title: "实验室GPU使用情况",
-  description: "GPU Utilization in CITE Lab",
-};
 
 export default function Home() {
   return (

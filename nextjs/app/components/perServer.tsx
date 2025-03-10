@@ -18,8 +18,13 @@ export default function PerServer({ url, title, internal_time=1000 }: PerServerP
 
   useEffect(() => {
     const interval = setInterval(() => {
-      fetch(url)
-        .then((res) => res.json())
+      fetch('/api/proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      }).then((res) => res.json())
         .then((data) => {
           setData(data);
         });
