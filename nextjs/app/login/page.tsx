@@ -48,6 +48,7 @@ const LoginPage = () => {
         messageApi.error(data.message || '发送验证码失败');
       }
     } catch (error) {
+      console.error('Send code error:', error);
       messageApi.error('请输入有效的邮箱地址');
     } finally {
       setSendingCode(false);
@@ -77,6 +78,7 @@ const LoginPage = () => {
         messageApi.error(data.message || '登录失败');
       }
     } catch (error) {
+      console.error('Login error:', error);
       messageApi.error('登录发生错误，请重试');
     } finally {
       setLoading(false);

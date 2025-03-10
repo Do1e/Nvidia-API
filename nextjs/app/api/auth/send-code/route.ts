@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { setVerificationCodeWithExpiry, canResendVerificationCode } from '@/app/lib/redis';
 
 const DEVOPS = process.env.DEVOPS || '';
 
@@ -7,9 +8,6 @@ const DEVOPS = process.env.DEVOPS || '';
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
-
-// 用于储存验证码，实际应用中可以使用Redis等
-const verificationCodes: Record<string, { code: string; expires: number }> = {};
 
 export async function POST(req: Request) {
   try {
@@ -26,24 +24,23 @@ export async function POST(req: Request) {
       );
     }
 
-    if (email in verificationCodes) {
-      const { expires } = verificationCodes[email];
-      if (Date.now() < expires - 9 * 60 * 1000) {
-        return NextResponse.json(
-          { success: false, message: '请勿重复请求' },
-          { status: 429 }
-        );
-      }
+    // 检查是否允许重新发送验证码
+    const canResend = await canResendVerificationCode(email);
+    if (!canResend) {
+      return NextResponse.json(
+        { success: false, message: '请勿重复请求' },
+        { status: 429 }
+      );
     }
 
     // 生成验证码
     const code = generateVerificationCode();
 
     // 保存验证码，设置10分钟有效期
-    verificationCodes[email] = {
+    await setVerificationCodeWithExpiry(email, {
       code,
       expires: Date.now() + 10 * 60 * 1000,
-    };
+    });
 
     // 配置邮件传输器
     const transporter = nodemailer.createTransport({
@@ -81,6 +78,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
-// 导出验证码存储，供登录接口使用
-export { verificationCodes };

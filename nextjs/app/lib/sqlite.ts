@@ -9,7 +9,6 @@ let db: Database | null = null;
 
 // 初始化数据库
 export async function initializeDatabase() {
-  console.log(DB_PATH, path.resolve(DB_PATH));
   if (!db) {
     // 确保在相对路径中正确找到数据库文件
     const dbPath = path.resolve(DB_PATH);

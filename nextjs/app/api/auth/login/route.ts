@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
-import { verificationCodes } from '../send-code/route';
+import { getVerificationRecordWithExpiry, deleteVerificationCode } from '@/app/lib/redis';
 
 const DEVOPS = process.env.DEVOPS || '';
 const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret-key";
@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: `该邮箱不在允许列表中，请联系${DEVOPS}添加` }, { status: 403 });
     }
 
-    // 检查验证码是否存在
-    const storedVerification = verificationCodes[email];
+    // 从Redis获取验证码记录
+    const storedVerification = await getVerificationRecordWithExpiry(email);
     if (!storedVerification) {
       return NextResponse.json(
         { success: false, message: '验证码不存在或已过期，请重新获取' },
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     // 检查验证码是否过期
     if (Date.now() > storedVerification.expires) {
       // 删除过期验证码
-      delete verificationCodes[email];
+      await deleteVerificationCode(email);
       return NextResponse.json(
         { success: false, message: '验证码已过期，请重新获取' },
         { status: 400 }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证通过，删除已使用的验证码
-    delete verificationCodes[email];
+    await deleteVerificationCode(email);
 
     // 生成JWT令牌，包含用户邮箱信息
     const token = await new jose.SignJWT({

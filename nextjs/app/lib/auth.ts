@@ -15,6 +15,7 @@ export async function verifyAuth() {
     await jose.jwtVerify(token, secret);
     return true;
   } catch (err) {
+    console.error("Token verification failed:", err);
     (await cookies()).delete("auth_token");
     return false;
   }
