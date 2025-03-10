@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime('7d')
+      .setExpirationTime('30d')
       .sign(new TextEncoder().encode(JWT_SECRET));
 
     return NextResponse.json({ message: '登录成功', token });
