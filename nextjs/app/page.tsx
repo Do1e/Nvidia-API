@@ -1,10 +1,29 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import PerServer from "./components/perServer";
 import servers from "./servers.json";
 
 export default function Home() {
+  useEffect(() => {
+    // 访问首页时记录用户访问信息
+    const access = async () => {
+      try {
+        await fetch('/api/access', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      } catch (error) {
+        console.error('Failed to log access:', error);
+      }
+    };
+
+    access();
+  }, []);
+
   return (
     <div className="max-w-7xl mx-auto">
       <h1 className="text-center">实验室GPU使用情况</h1>

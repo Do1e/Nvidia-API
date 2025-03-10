@@ -1,22 +1,24 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
 import { verificationCodes } from '../send-code/route';
 
 const DEVOPS = process.env.DEVOPS || '';
+const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret-key";
+const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || '').split(',');
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { email, code } = await req.json();
+    const body = await request.json();
+    const { email, code } = body;
 
-    // 获取允许的邮箱列表
-    const allowedEmails = process.env.ALLOWED_EMAILS?.split(',') || [];
+    // 验证邮箱格式
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ message: '无效的邮箱地址' }, { status: 400 });
+    }
 
-    // 检查邮箱是否在允许列表中
-    if (!allowedEmails.includes(email)) {
-      return NextResponse.json(
-        { success: false, message: `该邮箱不在允许列表中，请联系${DEVOPS}添加` },
-        { status: 403 }
-      );
+    // 检查是否是允许的邮箱
+    if (ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(email)) {
+      return NextResponse.json({ message: `该邮箱不在允许列表中，请联系${DEVOPS}添加` }, { status: 403 });
     }
 
     // 检查验证码是否存在
@@ -49,30 +51,19 @@ export async function POST(req: Request) {
     // 验证通过，删除已使用的验证码
     delete verificationCodes[email];
 
-    // 生成JWT令牌 - 使用jose替代jsonwebtoken
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'your-secret-key'
-    );
-
-    const token = await new jose.SignJWT({ email })
+    // 生成JWT令牌，包含用户邮箱信息
+    const token = await new jose.SignJWT({
+      email: email,
+      role: 'user'
+    })
       .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
       .setExpirationTime('7d')
-      .sign(secret);
+      .sign(new TextEncoder().encode(JWT_SECRET));
 
-    // 返回令牌
-    return NextResponse.json(
-      {
-        success: true,
-        message: '登录成功',
-        token,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: '登录成功', token });
   } catch (error) {
-    console.error('登录失败:', error);
-    return NextResponse.json(
-      { success: false, message: '登录失败，请稍后重试' },
-      { status: 500 }
-    );
+    console.error('Login error:', error);
+    return NextResponse.json({ message: '服务器错误' }, { status: 500 });
   }
 }
