@@ -1,33 +1,21 @@
-"use client";
-import { ConfigProvider, theme } from 'antd';
-import { useState, useEffect } from 'react';
 import "./globals.css";
+import type { Metadata } from "next";
+import React from "react";
+import ThemeProvider from './components/ThemeProvider';
+
+export const metadata: Metadata = {
+  title: "实验室GPU使用情况",
+  description: "GPU Utilization in CITE Lab",
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    // 检测系统主题
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(mediaQuery.matches);
-
-    // 监听系统主题变化
-    const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
   return (
-    <html lang="zh-CN">
+    <html lang="zh">
       <body>
-        <ConfigProvider
-          theme={{
-            algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm
-          }}
-        >
+        <ThemeProvider>
           {children}
-        </ConfigProvider>
+        </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
