@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import * as jose from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret-key";
-const publicPaths = ['/login', '/api/auth/login', '/api/auth/send-code', '/api/access', '/_next/static', '/_next/image', '/favicon.ico'];
+const publicPaths = ['/login', '/api', '/_next/static', '/_next/image', '/favicon.ico'];
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
