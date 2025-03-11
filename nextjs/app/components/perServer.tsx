@@ -7,12 +7,12 @@ import PerGPU from './perGPU';
 import type { GPUInfoType, ServerType } from './types';
 
 interface PerServerProps {
-  url: string;
+  serverId: string;
   title: string;
   internal_time?: number;
 }
 
-export default function PerServer({ url, title, internal_time=1000 }: PerServerProps) {
+export default function PerServer({ serverId, title, internal_time=1000 }: PerServerProps) {
   const [data, setData] = useState< ServerType | null>(null);
   const [activeKey, setActiveKey] = useState<string[]>(['0']);
 
@@ -28,7 +28,7 @@ export default function PerServer({ url, title, internal_time=1000 }: PerServerP
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ serverId }),
       }).then((res) => res.json())
         .then((data) => {
           setData(data);
@@ -41,14 +41,14 @@ export default function PerServer({ url, title, internal_time=1000 }: PerServerP
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ serverId }),
     }).then((res) => res.json())
       .then((data) => {
         setData(data);
       });
 
     return () => clearInterval(interval);
-  }, [url, internal_time, activeKey]); // 添加 activeKey 作为依赖项
+  }, [serverId, internal_time, activeKey]);
 
   useEffect(() => {
     const cookies = document.cookie.split(';');

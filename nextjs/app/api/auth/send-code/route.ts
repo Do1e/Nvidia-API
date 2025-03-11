@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
     // 发送邮件
     await transporter.sendMail({
-      from: `"CITE Lab GPU监控系统" <${process.env.SMTP_USER}>`,
+      from: `"GPU监控系统" <${process.env.SMTP_USER}>`,
       to: email,
       subject: `您的登录验证码是：${code}`,
       text: `您的登录验证码是：${code}，有效期为10分钟。`,

@@ -36,8 +36,8 @@ export default function Home() {
         </Link>
       </div>
       <div>
-        {Object.entries(servers).map(([key, value]) => (
-          <PerServer key={key} url={value} title={key.toUpperCase()} internal_time={1000} />
+        {Object.keys(servers).map((serverId) => (
+          <PerServer key={serverId} serverId={serverId} title={serverId.toUpperCase()} internal_time={1000} />
         ))}
       </div>
     </div>
